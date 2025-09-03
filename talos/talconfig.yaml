@@ -1,0 +1,93 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/budimanjojo/talhelper/master/pkg/config/schemas/talconfig.json
+---
+clusterName: kubernetes
+
+talosVersion: "${talosVersion}"
+kubernetesVersion: "${kubernetesVersion}"
+
+endpoint: https://192.168.178.100:6443
+additionalApiServerCertSans: &sans
+  - "127.0.0.1"
+  - "192.168.178.100"
+additionalMachineCertSans: *sans
+
+clusterPodNets: ["10.42.0.0/16"]
+clusterSvcNets: ["10.43.0.0/16"]
+
+# Disable built-in CNI to use Cilium
+cniConfig:
+  name: none
+
+nodes:
+  - hostname: "cp2"
+    ipAddress: "192.168.178.211"
+    installDisk: "/dev/sda"
+    machineSpec:
+      secureboot: false
+    talosImageURL: factory.talos.dev/installer/e2e3b54334c85fdef4d78e88f880d185e0ce0ba0c9b5861bb5daa1cd6574db9b
+    controlPlane: true
+    networkInterfaces:
+      - deviceSelector:
+          hardwareAddr: "c8:5b:76:64:8f:64"
+        dhcp: false
+        addresses:
+          - "192.168.178.211/24"
+        routes:
+          - network: "0.0.0.0/0"
+            gateway: "192.168.178.1"
+        mtu: 1500
+        vip:
+          ip: "192.168.178.100"
+  - hostname: "cp1"
+    ipAddress: "192.168.178.29"
+    installDisk: "/dev/nvme0n1"
+    machineSpec:
+      secureboot: false
+    talosImageURL: factory.talos.dev/installer/e2e3b54334c85fdef4d78e88f880d185e0ce0ba0c9b5861bb5daa1cd6574db9b
+    controlPlane: true
+    networkInterfaces:
+      - deviceSelector:
+          hardwareAddr: "d4:81:d7:5e:a1:ef"
+        dhcp: false
+        addresses:
+          - "192.168.178.29/24"
+        routes:
+          - network: "0.0.0.0/0"
+            gateway: "192.168.178.1"
+        mtu: 1500
+        vip:
+          ip: "192.168.178.100"
+  - hostname: "cp3"
+    ipAddress: "192.168.178.219"
+    installDisk: "/dev/nvme0n1"
+    machineSpec:
+      secureboot: false
+    talosImageURL: factory.talos.dev/installer/e2e3b54334c85fdef4d78e88f880d185e0ce0ba0c9b5861bb5daa1cd6574db9b
+    controlPlane: true
+    networkInterfaces:
+      - deviceSelector:
+          hardwareAddr: "e0:51:d8:17:f4:fb"
+        dhcp: false
+        addresses:
+          - "192.168.178.219/24"
+        routes:
+          - network: "0.0.0.0/0"
+            gateway: "192.168.178.1"
+        mtu: 1500
+        vip:
+          ip: "192.168.178.100"
+
+# Global patches
+patches:
+  - "@./patches/global/machine-files.yaml"
+  - "@./patches/global/machine-kubelet.yaml"
+  - "@./patches/global/machine-network.yaml"
+  - "@./patches/global/machine-sysctls.yaml"
+  - "@./patches/global/machine-time.yaml"
+
+# Controller patches
+controlPlane:
+  patches:
+    - "@./patches/controller/admission-controller-patch.yaml"
+    - "@./patches/controller/cluster.yaml"
+

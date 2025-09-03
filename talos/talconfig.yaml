@@ -20,7 +20,7 @@ cniConfig:
 
 nodes:
   - hostname: "cp2"
-    ipAddress: "192.168.178.211"
+    ipAddress: "192.168.178.42"
     installDisk: "/dev/sda"
     machineSpec:
       secureboot: false
@@ -31,15 +31,15 @@ nodes:
           hardwareAddr: "c8:5b:76:64:8f:64"
         dhcp: false
         addresses:
-          - "192.168.178.211/24"
+          - "192.168.178.42/24"
         routes:
           - network: "0.0.0.0/0"
             gateway: "192.168.178.1"
         mtu: 1500
         vip:
           ip: "192.168.178.100"
-  - hostname: "cp1"
-    ipAddress: "192.168.178.29"
+  - hostname: "cp3"
+    ipAddress: "192.168.178.210"
     installDisk: "/dev/nvme0n1"
     machineSpec:
       secureboot: false
@@ -50,15 +50,15 @@ nodes:
           hardwareAddr: "d4:81:d7:5e:a1:ef"
         dhcp: false
         addresses:
-          - "192.168.178.29/24"
+          - "192.168.178.210/24"
         routes:
           - network: "0.0.0.0/0"
             gateway: "192.168.178.1"
         mtu: 1500
         vip:
           ip: "192.168.178.100"
-  - hostname: "cp3"
-    ipAddress: "192.168.178.219"
+  - hostname: "cp1"
+    ipAddress: "192.168.178.36"
     installDisk: "/dev/nvme0n1"
     machineSpec:
       secureboot: false
@@ -69,7 +69,7 @@ nodes:
           hardwareAddr: "e0:51:d8:17:f4:fb"
         dhcp: false
         addresses:
-          - "192.168.178.219/24"
+          - "192.168.178.36/24"
         routes:
           - network: "0.0.0.0/0"
             gateway: "192.168.178.1"

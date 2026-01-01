@@ -9,6 +9,7 @@
     ":disableRateLimiting",
     ":semanticCommits",
   ],
+  automerge: true,
   dependencyDashboard: true,
   dependencyDashboardTitle: "Renovate Dashboard 🤖",
   schedule: ["every weekend"],

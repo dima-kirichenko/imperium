@@ -1,18 +1,15 @@
-{{`{{- $path := printf "../../../kubernetes/apps/%s/%s/app/helmrelease.yaml" .Release.Namespace .Release.Name -}}`}}
-{{`{{- $raw := readFile $path -}}`}}
-{{`{{- $docs := splitList "\n---" $raw -}}`}}
-{{`{{- $hr := dict -}}`}}
-{{`{{- range $docs }}`}}
-  {{`{{- $doc := fromYaml . -}}`}}
-  {{`{{- if and $doc $doc.kind (eq ($doc.kind | toString) "HelmRelease") -}}`}}
-    {{`{{- $hr = $doc -}}`}}
-  {{`{{- end -}}`}}
-{{`{{- end -}}`}}
-{{`{{- if not (hasKey $hr "kind") -}}`}}
-{{`{{ fail (printf "No HelmRelease document found in %s (Release=%s)" $path .Release.Name) }}`}}
-{{`{{- end -}}`}}
-{{`{{- if and (hasKey $hr "spec") (hasKey $hr.spec "values") -}}`}}
-{{`{{ toYaml $hr.spec.values }}`}}
-{{`{{- else -}}`}}
-{{`# No .spec.values defined for {{ .Release.Name }} (using chart defaults)`}}
-{{`{{- end -}}`}}
+{{- $path := printf "../../../kubernetes/apps/%s/%s/app/helmrelease.yaml" .Release.Namespace .Release.Name -}}
+{{- $hr := fromYaml (readFile $path) -}}
+{{- if not $hr -}}
+{{-   fail (printf "HelmRelease file '%s' is empty or contains invalid YAML" $path) -}}
+{{- end -}}
+{{- if ne $hr.kind "HelmRelease" -}}
+{{-   fail (printf "Expected kind 'HelmRelease' in '%s' but found '%s'" $path $hr.kind) -}}
+{{- end -}}
+{{- if not (hasKey $hr "spec") -}}
+{{-   fail (printf "HelmRelease in '%s' is missing required 'spec' field" $path) -}}
+{{- end -}}
+{{- if not (hasKey $hr.spec "values") -}}
+{{-   fail (printf "HelmRelease in '%s' is missing required 'spec.values' field" $path) -}}
+{{- end -}}
+{{- $hr.spec.values | toYaml -}}

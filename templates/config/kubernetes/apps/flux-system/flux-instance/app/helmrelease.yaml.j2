@@ -1,44 +1,18 @@
 ---
-# yaml-language-server: $schema=https://raw.githubusercontent.com/fluxcd-community/flux2-schemas/main/ocirepository-source-v1.json
-apiVersion: source.toolkit.fluxcd.io/v1
-kind: OCIRepository
-metadata:
-  name: flux-instance
-spec:
-  interval: 15m
-  layerSelector:
-    mediaType: application/vnd.cncf.helm.chart.content.v1.tar+gzip
-    operation: copy
-  ref:
-    tag: 0.38.1
-  url: oci://ghcr.io/controlplaneio-fluxcd/charts/flux-instance
----
-# yaml-language-server: $schema=https://raw.githubusercontent.com/fluxcd-community/flux2-schemas/main/helmrelease-helm-v2.json
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
   name: flux-instance
 spec:
-  interval: 1h
   chartRef:
     kind: OCIRepository
     name: flux-instance
-  install:
-    remediation:
-      retries: -1
-  upgrade:
-    cleanupOnFail: true
-    remediation:
-      strategy: rollback
-      retries: 3
-  dependsOn:
-    - name: flux-operator
-      namespace: flux-system
+  interval: 1h
   values:
     instance:
       distribution:
-        # renovate: datasource=github-releases depName=controlplaneio-fluxcd/distribution
-        version: 2.7.5
+        artifact: oci://ghcr.io/controlplaneio-fluxcd/flux-operator-manifests:v0.38.1
+        version: 2.x
       cluster:
         networkPolicy: false
       components:
@@ -139,3 +113,27 @@ spec:
             target:
               kind: Deployment
               name: helm-controller
+          - # Controller-level SOPS decryption
+            patch: |
+              - op: add
+                path: /spec/template/spec/containers/0/args/-
+                value: --sops-age-secret=sops-age
+            target:
+              kind: Deployment
+              name: kustomize-controller
+          - # Watch configmaps and secrets attached to HelmReleases and Kustomizations
+            patch: |-
+              - op: add
+                path: /spec/template/spec/containers/0/args/-
+                value: --watch-configs-label-selector=owner!=helm
+            target:
+              kind: Deployment
+              name: (helm-controller|kustomize-controller)
+          - # Cancel health checks on new Kustomizations revisions
+            patch: |-
+              - op: add
+                path: /spec/template/spec/containers/0/args/-
+                value: --feature-gates=CancelHealthCheckOnNewRevision=true
+            target:
+              kind: Deployment
+              name: kustomize-controller

@@ -1,1 +1,15 @@
-{{ (fromYaml (readFile (printf "../../../kubernetes/apps/%s/%s/app/helmrelease.yaml" .Release.Namespace .Release.Name))).spec.values | toYaml }}
+{{- $path := printf "../../../kubernetes/apps/%s/%s/app/helmrelease.yaml" .Release.Namespace .Release.Name -}}
+{{- $hr := fromYaml (readFile $path) -}}
+{{- if not $hr -}}
+{{-   fail (printf "HelmRelease file '%s' is empty or contains invalid YAML" $path) -}}
+{{- end -}}
+{{- if ne $hr.kind "HelmRelease" -}}
+{{-   fail (printf "Expected kind 'HelmRelease' in '%s' but found '%s'" $path $hr.kind) -}}
+{{- end -}}
+{{- if not (hasKey $hr "spec") -}}
+{{-   fail (printf "HelmRelease in '%s' is missing required 'spec' field" $path) -}}
+{{- end -}}
+{{- if not (hasKey $hr.spec "values") -}}
+{{-   fail (printf "HelmRelease in '%s' is missing required 'spec.values' field" $path) -}}
+{{- end -}}
+{{- $hr.spec.values | toYaml -}}

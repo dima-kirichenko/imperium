@@ -9,6 +9,9 @@
 {{- if not (hasKey $hr "spec") -}}
 {{-   fail (printf "HelmRelease in '%s' is missing required 'spec' field" $path) -}}
 {{- end -}}
+{{- if not $hr.spec -}}
+{{-   fail (printf "HelmRelease in '%s' has nil 'spec' field" $path) -}}
+{{- end -}}
 {{- if not (hasKey $hr.spec "values") -}}
 {{-   fail (printf "HelmRelease in '%s' is missing required 'spec.values' field" $path) -}}
 {{- end -}}

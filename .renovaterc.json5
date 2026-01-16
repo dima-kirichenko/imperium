@@ -11,7 +11,7 @@
   ],
   automerge: true,
   dependencyDashboard: true,
-  dependencyDashboardTitle: "Renovate Dashboard :robot:",
+  dependencyDashboardTitle: "Renovate Dashboard 🤖",
   schedule: ["at any time"],
   ignorePaths: ["**/*.sops.*"],
   flux: {

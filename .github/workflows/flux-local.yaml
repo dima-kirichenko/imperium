@@ -64,6 +64,12 @@ jobs:
           ref: "${{ github.event.repository.default_branch }}"
           path: default
 
+      - name: Normalize Default Cilium OCI Chart
+        run: |
+          while IFS= read -r -d '' file; do
+            sed -i 's#oci://ghcr.io/home-operations/charts-mirror/cilium#oci://quay.io/cilium/charts/cilium#g' "$file"
+          done < <(grep -rlZ 'ghcr\.io/home-operations/charts-mirror/cilium' default)
+
       - name: Run flux-local diff
         uses: docker://ghcr.io/allenporter/flux-local:v8.4.0
         with:
